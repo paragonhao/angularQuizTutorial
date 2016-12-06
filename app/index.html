@@ -1,43 +1,173 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<html lang="en" ng-app="turtleFacts">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>My AngularJS App</title>
+  <title>Quiz</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+        integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+        crossorigin="anonymous">
   <link rel="stylesheet" href="app.css">
-  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+
 </head>
 <body>
-  <ul class="menu">
-    <li><a href="#!/view1">view1</a></li>
-    <li><a href="#!/view2">view2</a></li>
-  </ul>
+<div class="container">
+  <div class="page-header">
+    <h1>Turtle Facts Quiz</h1>
+    <h3> Learn about all the turtles below before you decide to take on the quiz
+      <strong>TURTLE QUIZ</strong>
+    </h3>
+  </div>
+  <div ng-controller ="listCtrl as list" ng-hide="list.quizMetrics.quizActive">
+    <form class="form-inline well well-sm clearfix">
+      <span class="glyphicon glyphicon-search"></span>
+      <input type="text" placeholder="Search..." class="form-control"
+              ng-model="list.search">
+      <button class="btn btn-warning pull-right" ng-click="list.activateQuiz()">
+        <strong>Start Quiz</strong>
+      </button>
+    </form>
+    <div class="row">
+      <div class="col-sm-6" ng-repeat="turtle in list.data | filter:list.search">
+          <div class="well well-sm">
+            <div class="row">
+               <div class="col-md-6">
+                 <img ng-src="{{turtle.image_url}}" class="img-rounded img-responsive well-image">
+               </div>
+              <div class="col-md-6">
+                  <h4>{{turtle.type}}</h4>
+                <p><strong>Locations: </strong>{{turtle.locations}}</p>
+                <p><strong>Size: </strong>{{turtle.size}}</p>
+                <p><strong>Average Lifespan: </strong>{{turtle.lifespan}}</p>
+                <p><strong>Diet:  </strong>{{turtle.diet}}</p>
+                <button class="btn btn-primary pull-right"
+                data-toggle="modal"
+                data-target="#turtle-info"
+                ng-click="list.changeActiveTurtle(turtle)">Learn More</button>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+    <!--container for the dialog-->
+    <div class="modal" id =turtle-info>
+      <div class ="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>{{list.activeTurtle.type}}</h2>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-xs-8 col-xs-offset-1">
+                <img ng-src="{{list.activeTurtle.image_url}}" class="img-rounded img-responsive well image"/>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 top-buffer">
+                <p><strong>Locations: </strong>{{list.activeTurtle.locations}}</p>
+                <p><strong>Size: </strong>{{list.activeTurtle.size}}</p>
+                <p><strong>Average Lifespan: </strong>{{list.activeTurtle.lifespan}}</p>
+                <p><strong>Diet: </strong>{{list.activeTurtle.diet}}</p>
+              </div>
+              <div class="col-xs-12 top-buffer">
+                <!-- angular data binding and data-dismiss for bootstrap -->
+                <p>{{list.activeTurtle.description}}</p>
+                <button class="btn btn-danger pull-right"
+                        data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  <!--container for the Question Page-->
+  <div ng-controller="quizCtrl as quiz" ng-show="quiz.quizMetrics.quizActive">
+    <div class="row">
+      <div class="col-xs-8">
+          <h2>Progress:</h2>
+          <div class="btn-toolbar">
+            <button class="btn" ng-repeat="question in quiz.dataService.quizQuestions"
+                    ng-class="{'btn-info': question.selected !== null, 'btn-danger':
+                    question.selected === null}"
+                    ng-click = "quiz.setActiveQuestion($index)">
+              <span class="glyphicon"
+                    ng-class="{'glyphicon-pencil': question.selected !== null,
+                    'glyphicon-question-sign': question.selected === null}"></span>
+            </button>
+          </div>
+      </div>
+      <div class="col-xs-4">
+          <div class="row">
+            <h4>Legend</h4>
+            <div class="col-sm-4">
+              <button class="btn btn-info col-sm-offset-1">
+                <span class="glyphicon glyphicon-pencil"></span>
+              </button>
+              <p>Answered</p>
+            </div>
+            <div class="col-sm-4">
+              <button class="btn btn-info btn-danger col-sm-offset-2">
+                <span class="glyphicon glyphicon-question-sign"></span>
+              </button>
+              <p>Unanswered</p>
+            </div>
+          </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="alert alert-danger"
+        ng-show="quiz.error">
+        Error! You have not answered all of the questions!
+        <button class="close" ng-click="quiz.error = false">&times</button>
+      </div>
+      <h3>Question:</h3>
+      <div class="well well-sm">
+        <div class="row">
+          <div class="col-xs-12">
+            <h4>{{quiz.activeQuestion + 1 + ". "+quiz.dataService.quizQuestions[quiz.activeQuestion].text}}</h4>
+            <div class="row" ng-if ="quiz.dataService.quizQuestions[quiz.activeQuestion].type === 'text'">
+              <div class="col-sm-6"
+                   ng-repeat="answer in quiz.dataService.quizQuestions[quiz.activeQuestion].possibilities">
+                <h4 class = "answer" ng-class="{'bg-info': $index === quiz.dataService.quizQuestions[quiz.activeQuestion].selected}"
+                ng-click="quiz.selectAnswer($index)">
+                  {{answer.answer}}
+                </h4>
+              </div>
+            </div>
 
-  <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-  <![endif]-->
+            <div class="row" ng-if ="quiz.dataService.quizQuestions[quiz.activeQuestion].type === 'image'">
+              <div class="col-sm-6" ng-repeat="answer in quiz.dataService.quizQuestions[quiz.activeQuestion].possibilities">
+                <div class="image-answer" ng-class="{'image-selected': $index ===quiz.dataService.quizQuestions[quiz.activeQuestion].selected}"
+                ng-click="quiz.selectAnswer($index)">
+                  <img ng-src="{{answer.answer}}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-warning pull-left" ng-click="quiz.questionAnswered()">Continue</button>
+    </div>
 
-  <div ng-view></div>
 
-  <div>Angular seed app: v<span app-version></span></div>
+  </div>
+</div>
 
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-  -->
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
-  <script src="app.js"></script>
-  <script src="view1/view1.js"></script>
-  <script src="view2/view2.js"></script>
-  <script src="components/version/version.js"></script>
-  <script src="components/version/version-directive.js"></script>
-  <script src="components/version/interpolate-filter.js"></script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0-rc.2/angular.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+<script src="app.module.js"></script>
+<script src="controllers/list.js"></script>
+<script src="controllers/quiz.js"></script>
+<script src="factories/quizMetrics.js"></script>
+<script src="factories/dataService.js"></script>
 </body>
 </html>
+
+
+
